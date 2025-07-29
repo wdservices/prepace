@@ -22,6 +22,7 @@ const TranslateQuestionOutputSchema = z.object({
   translatedQuestion: z.string().describe('The translated question text.'),
   translatedOptions: z.array(z.string()).describe('The translated multiple-choice options.'),
   translatedAnswer: z.string().describe('The translated correct answer text.'),
+  error: z.string().optional().describe('An error message if translation failed.'),
 });
 export type TranslateQuestionOutput = z.infer<typeof TranslateQuestionOutputSchema>;
 
@@ -53,7 +54,17 @@ const translateQuestionFlow = ai.defineFlow(
     outputSchema: TranslateQuestionOutputSchema,
   },
   async (input) => {
-    const { output } = await prompt(input);
-    return output!;
+    try {
+      const { output } = await prompt(input);
+      return output!;
+    } catch (error) {
+        console.error('Translation flow error:', error);
+        return {
+            translatedQuestion: input.question,
+            translatedOptions: input.options,
+            translatedAnswer: input.answer,
+            error: 'The translation service is currently unavailable. Please try again later.'
+        }
+    }
   }
 );

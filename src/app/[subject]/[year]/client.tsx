@@ -6,7 +6,7 @@ import type { Question } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
-import { CheckCircle2, XCircle, Loader, MessageCircleQuestion, ArrowRight, Bot, Languages } from "lucide-react";
+import { CheckCircle2, XCircle, Loader, MessageCircleQuestion, ArrowRight, Bot, Languages, AlertTriangle } from "lucide-react";
 import { useProgress } from "@/hooks/use-progress";
 import { generateExplanation } from "@/ai/flows/generate-explanation";
 import { translateQuestion, TranslateQuestionOutput } from "@/ai/flows/translate-question";
@@ -41,6 +41,7 @@ export function QuestionClientPage({ subject, year, questions }: QuestionClientP
   const [selectedLanguage, setSelectedLanguage] = useState('English');
   const [translatedData, setTranslatedData] = useState<TranslatedData | null>(null);
   const [isTranslating, setIsTranslating] = useState(false);
+  const [translationError, setTranslationError] = useState<string | null>(null);
 
   const currentQuestion = useMemo(() => questions[currentQuestionIndex], [questions, currentQuestionIndex]);
   const isQuestionAnswered = selectedOption !== null;
@@ -48,6 +49,7 @@ export function QuestionClientPage({ subject, year, questions }: QuestionClientP
   useEffect(() => {
     setSelectedLanguage('English');
     setTranslatedData(null);
+    setTranslationError(null);
   }, [currentQuestionIndex]);
   
   const handleAnswerSelect = async (option: string) => {
@@ -90,6 +92,7 @@ export function QuestionClientPage({ subject, year, questions }: QuestionClientP
   };
   
   const handleLanguageChange = async (language: string) => {
+    setTranslationError(null);
     if (language === 'English') {
         setTranslatedData(null);
         setSelectedLanguage('English');
@@ -105,14 +108,22 @@ export function QuestionClientPage({ subject, year, questions }: QuestionClientP
             answer: currentQuestion.answer,
             language: language,
         });
-        setTranslatedData({
-            question: result.translatedQuestion,
-            options: result.translatedOptions,
-            answer: result.translatedAnswer
-        });
+
+        if (result.error) {
+            setTranslationError(result.error);
+            setTranslatedData(null);
+            setSelectedLanguage('English');
+        } else {
+            setTranslatedData({
+                question: result.translatedQuestion,
+                options: result.translatedOptions,
+                answer: result.translatedAnswer
+            });
+        }
     } catch (error) {
         console.error("Error translating question:", error);
-        // Handle error state in UI if needed
+        setTranslationError("An unexpected error occurred during translation.");
+        setSelectedLanguage('English');
     } finally {
         setIsTranslating(false);
     }
@@ -170,6 +181,15 @@ export function QuestionClientPage({ subject, year, questions }: QuestionClientP
             </div>
         </div>
       </div>
+
+       {translationError && (
+        <Alert variant="destructive" className="w-full max-w-2xl mt-4">
+            <AlertTriangle className="h-4 w-4" />
+            <AlertTitle>Translation Failed</AlertTitle>
+            <AlertDescription>{translationError}</AlertDescription>
+        </Alert>
+      )}
+
       <Card className="w-full max-w-2xl mt-4">
         <CardHeader>
           <CardTitle className="text-2xl font-headline leading-tight">
