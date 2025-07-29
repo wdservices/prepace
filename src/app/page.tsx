@@ -1,47 +1,94 @@
-"use client";
 
-import Link from "next/link";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Header } from "@/components/Header";
-import { ProgressBar } from "@/components/ProgressBar";
-import { useProgress } from "@/hooks/use-progress";
-import { getSubjects, getTotalQuestionsInSubject, getSubjectIcon } from "@/lib/data";
+import Link from 'next/link';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Header } from '@/components/Header';
+import { CheckCircle, BookOpenCheck, Bot, BarChart } from 'lucide-react';
+import Image from 'next/image';
 
-export default function Home() {
-  const subjects = getSubjects();
-  const { getSubjectProgress } = useProgress();
+export default function LandingPage() {
+  const features = [
+    {
+      icon: <BookOpenCheck className="h-10 w-10 text-primary" />,
+      title: 'Past Questions',
+      description: 'Access a vast library of past WAEC exam questions by subject and year.',
+    },
+    {
+      icon: <CheckCircle className="h-10 w-10 text-primary" />,
+      title: 'Instant Feedback',
+      description: 'Receive immediate feedback on your answers and get AI-powered explanations.',
+    },
+    {
+      icon: <Bot className="h-10 w-10 text-primary" />,
+      title: 'AI Assistant',
+      description: 'A subject-specific chatbot to help you with follow-up questions.',
+    },
+    {
+      icon: <BarChart className="h-10 w-10 text-primary" />,
+      title: 'Progress Tracking',
+      description: 'Monitor your completion rates for each subject to stay on track.',
+    },
+  ];
 
   return (
     <>
       <Header />
-      <main className="flex-1 container mx-auto p-4 md:p-8">
-        <h1 className="text-2xl md:text-3xl font-bold mb-6 font-headline text-center">
-          Choose a Subject
-        </h1>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {subjects.map((subjectName) => {
-            const progress = getSubjectProgress(subjectName);
-            const totalQuestions = getTotalQuestionsInSubject(subjectName);
-            const percentage = totalQuestions > 0 ? (progress / totalQuestions) * 100 : 0;
-            const Icon = getSubjectIcon(subjectName);
+      <main className="flex-1">
+        {/* Hero Section */}
+        <section className="text-center py-20 px-4 bg-primary/10">
+          <div className="container mx-auto">
+            <h1 className="text-4xl md:text-5xl font-bold font-headline mb-4">
+              Ace Your WAEC Exams with Confidence
+            </h1>
+            <p className="text-lg md:text-xl text-muted-foreground mb-8 max-w-3xl mx-auto">
+              PrepAce provides AI-powered tools, offline access to past questions, and personalized feedback to help you excel.
+            </p>
+            <Button asChild size="lg">
+              <Link href="/subjects">Get Started Now</Link>
+            </Button>
+            <div className="mt-12 relative w-full max-w-4xl mx-auto">
+              <Image 
+                src="https://placehold.co/1200x600.png"
+                alt="App screenshot"
+                width={1200}
+                height={600}
+                className="rounded-lg shadow-2xl"
+                data-ai-hint="app user interface"
+              />
+            </div>
+          </div>
+        </section>
 
-            return (
-              <Link href={`/${subjectName}`} key={subjectName}>
-                <Card className="hover:shadow-lg transition-shadow duration-300 h-full flex flex-col">
-                  <CardHeader className="flex flex-row items-center justify-between pb-2">
-                    <CardTitle className="text-xl font-headline">{subjectName}</CardTitle>
-                    <Icon className="h-8 w-8 text-primary" />
+        {/* Features Section */}
+        <section id="features" className="py-20 px-4">
+          <div className="container mx-auto">
+            <h2 className="text-3xl md:text-4xl font-bold text-center font-headline mb-12">
+              Everything You Need to Succeed
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+              {features.map((feature, index) => (
+                <Card key={index} className="text-center">
+                  <CardHeader>
+                    <div className="mx-auto bg-primary/10 rounded-full h-20 w-20 flex items-center justify-center">
+                      {feature.icon}
+                    </div>
                   </CardHeader>
-                  <CardContent className="flex-1 flex flex-col justify-end">
-                    <p className="text-sm text-muted-foreground mb-2">{progress} / {totalQuestions} questions completed</p>
-                    <ProgressBar value={percentage} />
+                  <CardContent>
+                    <CardTitle className="text-xl font-headline mb-2">{feature.title}</CardTitle>
+                    <p className="text-muted-foreground">{feature.description}</p>
                   </CardContent>
                 </Card>
-              </Link>
-            );
-          })}
-        </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
       </main>
+      <footer className="bg-card border-t py-6">
+        <div className="container mx-auto text-center text-muted-foreground">
+            <p>&copy; {new Date().getFullYear()} WAEC PrepAce. All rights reserved.</p>
+        </div>
+      </footer>
     </>
   );
 }
