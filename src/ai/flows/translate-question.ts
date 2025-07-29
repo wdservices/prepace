@@ -8,7 +8,8 @@
  */
 
 import { ai } from '@/ai/genkit';
-import { z } from 'genkit';
+import { z } from 'zod';
+import { translate } from 'google-translate-api-browser';
 
 const TranslateQuestionInputSchema = z.object({
   question: z.string().describe('The question text to translate.'),
@@ -55,16 +56,39 @@ const translateQuestionFlow = ai.defineFlow(
   },
   async (input) => {
     try {
+      // First, try to use the Genkit AI for translation
       const { output } = await prompt(input);
-      return output!;
-    } catch (error) {
-        console.error('Translation flow error:', error);
+      if (output?.translatedQuestion) {
+        return output;
+      }
+      throw new Error("AI translation failed to produce output.");
+    } catch (aiError) {
+      console.warn('AI translation failed, falling back to basic translation:', aiError);
+      try {
+        // Fallback to google-translate-api-browser
+        const targetLang = input.language.substring(0, 2).toLowerCase();
+        
+        const [tQuestion, tAnswer, ...tOptions] = await Promise.all([
+            translate(input.question, { to: targetLang }).then(res => res.text),
+            translate(input.answer, { to: targetLang }).then(res => res.text),
+            ...input.options.map(opt => translate(opt, { to: targetLang }).then(res => res.text))
+        ]);
+
         return {
+          translatedQuestion: tQuestion,
+          translatedOptions: tOptions,
+          translatedAnswer: tAnswer,
+        };
+
+      } catch (fallbackError) {
+         console.error('Fallback translation also failed:', fallbackError);
+         return {
             translatedQuestion: input.question,
             translatedOptions: input.options,
             translatedAnswer: input.answer,
             error: 'The translation service is currently unavailable. Please try again later.'
         }
+      }
     }
   }
 );

@@ -56,9 +56,17 @@ export function QuestionClientPage({ subject, year, questions }: QuestionClientP
     if (isQuestionAnswered) return;
 
     const originalAnswer = currentQuestion.answer;
-    const isAnswerCorrect = selectedLanguage === 'English' 
-        ? option === originalAnswer
-        : option === translatedData?.answer;
+    
+    // Find the original English option corresponding to the selected translated option
+    let originalSelectedOption = option;
+    if (selectedLanguage !== 'English' && translatedData) {
+        const selectedIndex = translatedData.options.indexOf(option);
+        if (selectedIndex !== -1) {
+            originalSelectedOption = currentQuestion.options[selectedIndex];
+        }
+    }
+
+    const isAnswerCorrect = originalSelectedOption === originalAnswer;
 
     setSelectedOption(option);
     setIsCorrect(isAnswerCorrect);
@@ -71,7 +79,7 @@ export function QuestionClientPage({ subject, year, questions }: QuestionClientP
     try {
       const result = await generateExplanation({
         question: currentQuestion.question,
-        answer: originalAnswer, // Always send original answer to explanation
+        answer: originalSelectedOption, // Send original answer to explanation
         isCorrect: isAnswerCorrect,
       });
       setExplanation(result.explanation);
@@ -204,8 +212,14 @@ export function QuestionClientPage({ subject, year, questions }: QuestionClientP
                 </div>
             ) : (displayOptions.map((option, index) => {
               const isSelected = selectedOption === option;
-              const correctAnsw = translatedData?.answer || currentQuestion.answer;
-              const isTheCorrectAnswer = option === correctAnsw;
+
+              let isTheCorrectAnswer = false;
+              if (selectedLanguage === 'English') {
+                  isTheCorrectAnswer = option === currentQuestion.answer;
+              } else if (translatedData) {
+                  const originalOption = currentQuestion.options[index];
+                  isTheCorrectAnswer = originalOption === currentQuestion.answer;
+              }
 
               return (
                 <Button
@@ -269,5 +283,3 @@ export function QuestionClientPage({ subject, year, questions }: QuestionClientP
     </main>
   );
 }
-
-    
