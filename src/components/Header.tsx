@@ -12,6 +12,11 @@ export function Header() {
               WAEC PrepAce
             </span>
           </Link>
+          <nav>
+            <Link href="/admin" className="text-sm font-medium text-muted-foreground hover:text-primary">
+              Dashboard
+            </Link>
+          </nav>
         </div>
       </div>
     </header>
