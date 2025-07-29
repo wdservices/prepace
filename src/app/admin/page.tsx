@@ -1,7 +1,7 @@
 
 import { Header } from "@/components/Header";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { BookOpen, Sigma, Users, Activity } from "lucide-react";
+import { BookOpen, Sigma, Users, Activity, PlusCircle } from "lucide-react";
 import { getSubjects, getTotalQuestionsInSubject } from "@/lib/data";
 import { EngagementChart } from "./engagement-chart";
 import {
@@ -12,6 +12,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
 
 export default function AdminDashboard() {
   const subjects = getSubjects();
@@ -29,7 +30,13 @@ export default function AdminDashboard() {
     <div className="flex flex-col min-h-screen">
       <Header />
       <main className="flex-1 container mx-auto p-4 md:p-8">
-        <h1 className="text-3xl font-bold font-headline mb-6">Admin Dashboard</h1>
+        <div className="flex items-center justify-between mb-6">
+            <h1 className="text-3xl font-bold font-headline">Admin Dashboard</h1>
+            <Button>
+                <PlusCircle className="mr-2 h-4 w-4" />
+                Add Content
+            </Button>
+        </div>
 
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 mb-6">
           <Card>
