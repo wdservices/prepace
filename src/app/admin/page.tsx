@@ -13,6 +13,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 export default function AdminDashboard() {
   const subjects = getSubjects();
@@ -32,9 +33,11 @@ export default function AdminDashboard() {
       <main className="flex-1 container mx-auto p-4 md:p-8">
         <div className="flex items-center justify-between mb-6">
             <h1 className="text-3xl font-bold font-headline">Admin Dashboard</h1>
-            <Button>
-                <PlusCircle className="mr-2 h-4 w-4" />
-                Add Content
+            <Button asChild>
+                <Link href="/admin/add-content">
+                    <PlusCircle className="mr-2 h-4 w-4" />
+                    Add Content
+                </Link>
             </Button>
         </div>
 
