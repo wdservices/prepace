@@ -5,7 +5,7 @@ import type { Question } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
-import { CheckCircle2, XCircle, Loader, MessageCircleQuestion, ArrowRight } from "lucide-react";
+import { CheckCircle2, XCircle, Loader, MessageCircleQuestion, ArrowRight, Bot } from "lucide-react";
 import { useProgress } from "@/hooks/use-progress";
 import { generateExplanation } from "@/ai/flows/generate-explanation";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -142,7 +142,13 @@ export function QuestionClientPage({ subject, year, questions }: QuestionClientP
                 Generating explanation...
               </div>
             ) : (
-              explanation
+              <div className="mt-2 space-y-2">
+                <div className="font-semibold flex items-center gap-2">
+                  <Bot size={16} />
+                  AI Explanation
+                </div>
+                <p>{explanation}</p>
+              </div>
             )}
           </AlertDescription>
         </Alert>
