@@ -9,7 +9,23 @@
 
 import { ai } from '@/ai/genkit';
 import { z } from 'zod';
-import { translate } from 'google-translate-api-browser';
+import translate from 'google-translate-api-browser';
+
+// Define the response type for the translation
+interface TranslationResponse {
+  text: string;
+  from: {
+    language: {
+      didYouMean: boolean;
+      iso: string;
+    };
+    text: {
+      autoCorrected: boolean;
+      value: string;
+      didYouMean: boolean;
+    };
+  };
+}
 
 const TranslateQuestionInputSchema = z.object({
   question: z.string().describe('The question text to translate.'),
@@ -65,13 +81,45 @@ const translateQuestionFlow = ai.defineFlow(
     } catch (aiError) {
       console.warn('AI translation failed, falling back to basic translation:', aiError);
       try {
-        // Fallback to google-translate-api-browser
-        const targetLang = input.language.substring(0, 2).toLowerCase();
+        // Map language names to their corresponding language codes
+        const languageMap: Record<string, string> = {
+          'hausa': 'ha',
+          'yoruba': 'yo',
+          'igbo': 'ig',
+          'french': 'fr',
+          'spanish': 'es',
+          'english': 'en'
+        };
+        
+        // Get the language code, defaulting to the first 2 letters if not in the map
+        const targetLang = languageMap[input.language.toLowerCase()] || 
+                          input.language.substring(0, 2).toLowerCase();
+        
+        console.log(`Translating to ${targetLang} (${input.language})`);
         
         const [tQuestion, tAnswer, ...tOptions] = await Promise.all([
-            translate(input.question, { to: targetLang }).then(res => res.text),
-            translate(input.answer, { to: targetLang }).then(res => res.text),
-            ...input.options.map(opt => translate(opt, { to: targetLang }).then(res => res.text))
+            translate(input.question, { to: targetLang })
+              .then((res: TranslationResponse) => res.text)
+              .catch((error: Error) => {
+                console.error('Error translating question:', error);
+                return input.question;
+              }),
+              
+            translate(input.answer, { to: targetLang })
+              .then((res: TranslationResponse) => res.text)
+              .catch((error: Error) => {
+                console.error('Error translating answer:', error);
+                return input.answer;
+              }),
+              
+            ...input.options.map(opt => 
+              translate(opt, { to: targetLang })
+                .then((res: TranslationResponse) => res.text)
+                .catch((error: Error) => {
+                  console.error('Error translating option:', error);
+                  return opt;
+                })
+            )
         ]);
 
         return {

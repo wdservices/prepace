@@ -48,12 +48,12 @@ export default function LandingPage() {
             </Button>
             <div className="mt-12 relative w-full max-w-4xl mx-auto">
               <Image 
-                src="https://placehold.co/1200x600.png"
-                alt="App screenshot"
+                src="/exams.webp"
+                alt="WAEC exam preparation"
                 width={1200}
                 height={600}
-                className="rounded-lg shadow-2xl"
-                data-ai-hint="app user interface"
+                className="rounded-lg shadow-2xl object-cover"
+                priority
               />
             </div>
           </div>
